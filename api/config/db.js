@@ -1,27 +1,21 @@
-import "dotenv/config";
-import mariadb from "mariadb";
+import 'dotenv/config';
+import mariadb from 'mariadb';
 
-export const pool = mariadb.createPool({
-  host: viaduct.proxy.rlwy.net,
-  port: 20727,
-  user: root,
-  password: AMHzkGHoUwLJuPwULvStMwGtPauOUzEY,
-  database: railway,
+const pool = mariadb.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 3306,
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'test',
 });
 
-pool
-  .getConnection()
-  .then(() => {
-    console.log("Berhasil terhubung ke basis data.");
+pool.getConnection()
+  .then(conn => {
+    console.log('Connected as id ' + conn.threadId);
+    conn.release(); // Releasing the connection back to the pool
   })
-  .catch((err) => {
-    console.error("Gagal terhubung ke basis data:", err);
+  .catch(err => {
+    console.error('Error connecting: ' + err.stack);
   });
 
-// connect to remote db
-const { Sequelize } = require('sequelize');
-const db = new Sequelize('mysql://root:AMHzkGHoUwLJuPwULvStMwGtPauOUzEY@viaduct.proxy.rlwy.net:20727/railway'), {
-  define: {
-    timestamps: false
-  }
-});
+export default pool;
